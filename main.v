@@ -8,6 +8,7 @@ import time
 import json
 import rand
 import log
+import flag
 
 __global (
 	s mut websocket.Server
@@ -28,12 +29,29 @@ struct Context {
 fn main() {
 	logger = &log.Log{}
 	logger.set_output_level(log.Level.disabled)
-	server_addr = 'ws://localhost:28173'
-	host_port = 28174
-	my_name = 'az'
-	my_uuid = rand.uuid_v4()
 
-	go start_client()
+	mut fp := flag.new_flag_parser(os.args)
+	fp.application('vPiper')
+	fp.version('v0.1.1')
+
+	server_addr = 'ws://' + fp.string('server', `s`, 'localhost:28173', 'Remote server address  default: localhost:28173')
+	host_port = fp.int('host', `h`, 28174, 'Local server port  default: 28174')
+	my_name = fp.string('name', `n`, 'user-0', 'Username  default: user-0')
+	my_uuid = fp.string('uuid', `u`, rand.uuid_v4(), 'UUID(You should not change this by default)  default: <random v4 uuid>')
+	connect := fp.bool('connect', `c`, false, 'Connect to remote server  default: false')
+
+	if os.args.contains('--help') {
+		println(fp.usage())
+		exit(0)
+	}
+
+	println('Name: ${my_name}  UUID: ${my_uuid}')
+
+	if connect {
+		go start_client()
+	} else {
+		ws = &websocket.Client{}
+	}
 	start_server()
 }
 
@@ -102,7 +120,7 @@ fn start_server() {
 
 fn server() ! {
 	println('starting server')
-	s = websocket.new_server(.ip6, host_port, '')
+	s = websocket.new_server(.ip, host_port, '')
 	defer {
 		unsafe {
 			s.free()
