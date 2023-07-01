@@ -2,7 +2,10 @@
 
 Chat across firewalls
 
-# Run
+## Environment
+Require [vlang `0.3.3`](https://github.com/vlang/v/releases/tag/0.3.3) to work
+
+## Run
 1. Type `v -enable-globals run ./main.v` to run main file. This will start a server on `ws://localhost:28174`
 2. Run `test/client1.v`. client1 will try to connect port `28174` and open a server on port `28175`
 3. Run `test/client2.v`. client2 will connect to port `28175`
